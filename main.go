@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"crypto/tls"
-	"encoding/json"
 	"flag"
 	"io"
 	"io/ioutil"
@@ -42,7 +41,6 @@ func main() {
 	switch format {
 	case "json":
 		f = &JSONFormatter{
-			Prefix: "",
 			Indent: "  ",
 		}
 	case "none":
@@ -74,40 +72,6 @@ func main() {
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Fatalf("dp: error listening: %v\n", err)
 	}
-}
-
-type nopformatter struct{}
-
-func (n nopformatter) Format(src []byte) ([]byte, error) { return src, nil }
-
-func NopFormatter() Formatter {
-	return nopformatter{}
-}
-
-type JSONFormatter struct {
-	Prefix string
-	Indent string
-}
-
-func (f *JSONFormatter) Format(src []byte) ([]byte, error) {
-	if len(src) == 0 {
-		return []byte{}, nil
-	}
-	var buf bytes.Buffer
-	err := json.Indent(&buf, src, f.Prefix, f.Indent)
-	if err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}
-
-type Formatter interface {
-	Format([]byte) ([]byte, error)
-}
-
-type Printer interface {
-	Printf(string, ...interface{}) (int, error)
-	Println(...interface{}) (int, error)
 }
 
 type SniffTransport struct {
