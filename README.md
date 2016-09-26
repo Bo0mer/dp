@@ -6,10 +6,21 @@ Sniff HTTP communication between two applications. Useful for reverse engineerin
 
 Let's say you want to monitor the communication between a local CLI, called `cf`, and a remote located at https://target.com. This could be done via:
 ```
-dp -target https://target.com
+dp -target https://target.com -addr localhost:8080
 ```
 
-And if the payload of the request/response bodies is formatted in JSON:
+And now, tell the `cf` CLI that your remote server is located at `localhost:8080`. For example:
+
+```
+cf api http://localhost:8080
+Setting api endpoint to localhost:8080...
+OK
+```
+
+Now observe how `dp` has printed the request and response headers and body to its stdin.
+
+## Additional options
+If the payload of the request/response bodies is formatted in JSON:
 ```
 dp -target https://target.com -format json
 ```
@@ -19,10 +30,11 @@ If the remote host is using TLS, but its certificate is not valid for some reaso
 dp -target https://invalid.cert -insecure
 ```
 
-## Supported payload formats (for pretty printing)
+### Supported payload formats (for pretty printing)
 * json
 * none
 
+## Full usage help
 Usage of dp:
 ```
   -addr string
