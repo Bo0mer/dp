@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"strings"
 )
 
 // Formatter formats bytes that represent text in different encodings.
@@ -23,7 +24,7 @@ func NopFormatter() Formatter {
 type JSONFormatter struct {
 	// Prefix is appendend to each new line of the formatted string.
 	Prefix string
-	// Indent is the symbol to use for indentation.
+	// Indent is the symbol to use for indentation. Defaults to two spaces.
 	Indent string
 }
 
@@ -33,6 +34,9 @@ func (f *JSONFormatter) Format(src []byte) ([]byte, error) {
 		return []byte{}, nil
 	}
 	var buf bytes.Buffer
+	if f.Indent == "" {
+		f.Indent = strings.Repeat(" ", 2)
+	}
 	err := json.Indent(&buf, src, f.Prefix, f.Indent)
 	if err != nil {
 		return nil, err
