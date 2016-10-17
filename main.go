@@ -11,6 +11,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 
+	"github.com/Bo0mer/flagvar"
 	"github.com/fatih/color"
 )
 
@@ -19,6 +20,7 @@ var (
 	target   string
 	format   string
 	insecure bool
+	headers  flagvar.Map
 )
 
 func init() {
@@ -26,6 +28,7 @@ func init() {
 	flag.StringVar(&target, "target", "https://google.com", "Target to proxy to.")
 	flag.StringVar(&format, "format", "none", "Attempt to format payloads as.")
 	flag.BoolVar(&insecure, "insecure", false, "Please do not!")
+	flag.Var(&headers, "header", "Header to add. Must be in Name:value format.")
 }
 
 func main() {
@@ -54,6 +57,9 @@ func main() {
 			req.Host = t.Host
 			req.URL.Scheme = t.Scheme
 			req.URL.Host = t.Host
+			for k, v := range headers {
+				req.Header.Add(k, v)
+			}
 		},
 		Transport: &SniffTransport{
 			RoundTripper: &http.Transport{
