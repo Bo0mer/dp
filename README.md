@@ -19,6 +19,8 @@ OK
 ```
 
 Now observe how `dp` has printed the request and response headers and body to its stdin.
+It will automatically try to guess how to format the content of the body, if
+no explicit format is provided using the `format` flag.
 
 ## Additional options
 If the payload of the request/response bodies is formatted in JSON:
@@ -32,8 +34,9 @@ dp -target https://invalid.cert -insecure
 ```
 
 ### Supported payload formats (for pretty printing)
+* auto (try to guess, includes all of the below)
 * json
-* none
+* plain
 
 ## Full usage help
 Usage of dp:
@@ -41,7 +44,7 @@ Usage of dp:
   -addr string
     	Address to bind to. (default "localhost:8080")
   -format string
-    	Attempt to format payloads as. (default "none")
+    	Attempt to format payloads as. (default "auto")
   -insecure
     	Please do not!
   -target string

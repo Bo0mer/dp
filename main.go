@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strings"
 
 	"github.com/Bo0mer/flagvar"
 	"github.com/fatih/color"
@@ -26,7 +27,7 @@ var (
 func init() {
 	flag.StringVar(&addr, "addr", "localhost:8080", "Address to bind to.")
 	flag.StringVar(&target, "target", "https://google.com", "Target to proxy to.")
-	flag.StringVar(&format, "format", "none", "Attempt to format payloads as.")
+	flag.StringVar(&format, "format", "auto", "Attempt to format payloads as.")
 	flag.BoolVar(&insecure, "insecure", false, "Please do not!")
 	flag.Var(&headers, "header", "Header to add. Must be in Name:value format.")
 }
@@ -40,14 +41,16 @@ func main() {
 		log.Fatalf("dp: error parsing target url: %v\n", err)
 	}
 
-	var f Formatter
+	fmts := make(map[string]Formatter)
 	switch format {
 	case "json":
-		f = &JSONFormatter{
-			Indent: "  ",
-		}
-	case "none":
-		f = NopFormatter()
+		fmts[""] = &JSONFormatter{}
+	case "plain":
+		fmts[""] = NopFormatter()
+	case "auto":
+		fmts["application/json"] = &JSONFormatter{}
+		fmts["text/plain"] = NopFormatter()
+		fmts[""] = NopFormatter()
 	default:
 		log.Fatalf("dp: unknown format: %q\n", format)
 	}
@@ -68,9 +71,9 @@ func main() {
 					InsecureSkipVerify: insecure,
 				},
 			},
-			Formatter: f,
-			In:        color.New(color.FgCyan),
-			Out:       color.New(color.FgMagenta),
+			Formatters: fmts,
+			In:         color.New(color.FgCyan),
+			Out:        color.New(color.FgMagenta),
 		},
 	}
 
@@ -81,7 +84,7 @@ func main() {
 }
 
 type SniffTransport struct {
-	Formatter    Formatter
+	Formatters   map[string]Formatter
 	RoundTripper http.RoundTripper
 	In           Printer
 	Out          Printer
@@ -102,39 +105,96 @@ func (s *SniffTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 }
 
 func (s *SniffTransport) dumpRequest(req *http.Request) error {
+	var err error
+	var save io.ReadCloser
+	savecl := req.ContentLength
+
 	reqHead, err := httputil.DumpRequest(req, false)
 	if err != nil {
 		return err
 	}
 	s.In.Printf(string(reqHead))
 
-	buf := bytes.Buffer{}
-	_, err = io.Copy(&buf, req.Body)
+	save, req.Body, err = drainBody(req.Body)
 	if err != nil {
 		return err
 	}
-	req.Body = ioutil.NopCloser(&buf)
+	req.ContentLength = savecl
 
-	orig := buf.Bytes()
-	fmted, err := s.Formatter.Format(orig)
+	orig, err := ioutil.ReadAll(save)
 	if err != nil {
-		log.Printf("dp: error formatting: %v\n", err)
-		fmted = orig
+		return err
 	}
-	fmted = bytes.TrimRight(fmted, "\n")
-	s.In.Println(string(fmted))
-	s.In.Println()
-	return nil
+
+	ct := detectContentType(req.Header, orig)
+	fmted, err := s.formatBody(orig, ct)
+	s.In.Println(fmted)
+	return err
 }
 
 func (s *SniffTransport) dumpResponse(resp *http.Response) error {
-	dump, err := httputil.DumpResponse(resp, true)
+	var err error
+	var save io.ReadCloser
+	savecl := resp.ContentLength
+
+	respHead, err := httputil.DumpResponse(resp, false)
+	if err != nil {
+		return err
+	}
+	s.Out.Printf(string(respHead))
+
+	save, resp.Body, err = drainBody(resp.Body)
+	if err != nil {
+		return err
+	}
+	resp.ContentLength = savecl
+
+	orig, err := ioutil.ReadAll(save)
 	if err != nil {
 		return err
 	}
 
-	bytes.TrimRight(dump, "\n")
-	s.Out.Println(string(dump))
-	s.Out.Println()
-	return nil
+	ct := detectContentType(resp.Header, orig)
+	fmted, err := s.formatBody(orig, ct)
+	s.Out.Println(fmted)
+	return err
+}
+
+func (s *SniffTransport) formatBody(body []byte, contentType string) (string, error) {
+	var f Formatter
+	var ok bool
+	if f, ok = s.Formatters[contentType]; !ok {
+		f = s.Formatters[""]
+	}
+
+	fmted, err := f.Format(body)
+	lf := byte('\n')
+	if !bytes.HasSuffix(fmted, []byte{lf}) {
+		fmted = append(fmted, lf)
+	}
+	return string(fmted), err
+}
+
+func drainBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {
+	var buf bytes.Buffer
+	if _, err := buf.ReadFrom(b); err != nil {
+		return nil, b, err
+	}
+	if err := b.Close(); err != nil {
+		return nil, b, err
+	}
+	return ioutil.NopCloser(&buf), ioutil.NopCloser(bytes.NewBuffer(buf.Bytes())), nil
+}
+
+func detectContentType(headers http.Header, body []byte) string {
+	ct := headers.Get("Content-Type")
+	if ct == "" {
+		ct = http.DetectContentType(body)
+	}
+	vals := strings.Split(ct, ";")
+	if len(vals) > 1 {
+		ct = vals[0]
+	}
+
+	return ct
 }
