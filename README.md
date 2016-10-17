@@ -45,6 +45,8 @@ Usage of dp:
     	Address to bind to. (default "localhost:8080")
   -format string
     	Attempt to format payloads as. (default "auto")
+  -header value
+    	Header to add. Must be in Name:value format.
   -insecure
     	Please do not!
   -target string
