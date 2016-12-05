@@ -28,7 +28,8 @@ If the payload of the request/response bodies is formatted in JSON:
 dp -target https://target.com -format json
 ```
 
-If the remote host is using TLS, but its certificate is not valid for some reason you can use the `-insecure` flag:
+If the remote host is using TLS, but its certificate is not valid for some reason you can use the `-insecure` flag.
+Please be careful!
 ```
 dp -target https://invalid.cert -insecure
 ```
