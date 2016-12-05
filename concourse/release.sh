@@ -17,7 +17,7 @@ project_path=$GOPATH/src/github.com/Bo0mer/
 mkdir -p $project_path
 cp -r dp $project_path
 
-cd $project_path
+cd $project_path/dp
 
 GOOS=linux GOARCH=amd64 go build -v -o $build_dir/dp_linux_amd64
 GOOS=darwin GOARCH=amd64 go build -v -o $build_dir/dp_darwin_amd64
