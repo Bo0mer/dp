@@ -1,4 +1,4 @@
-set -ex
+set -e
 
 mkdir -p build/
 build_dir=$(cd build && pwd)
