@@ -6,7 +6,7 @@ echo -e "v$version" > release_name
 echo -e "v$version" > release_tag
 
 git log `git describe --tags --abbrev=0`..HEAD --oneline > release_body
-cat $release_body
+cat release_body
 
 mkdir -p build/
 GOOS=linux GOARCH=amd64 go build -o build/dp_linux_amd64
