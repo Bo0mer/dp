@@ -11,6 +11,8 @@ cat release_body
 mkdir -p build/
 build_dir=$(cd build && pwd)
 
+cd ..
+
 project_path=$GOPATH/src/github.com/Bo0mer/
 mkdir -p $project_path
 cp -r dp $project_path
