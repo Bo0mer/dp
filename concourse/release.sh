@@ -3,14 +3,14 @@ set -ex
 mkdir -p build/
 build_dir=$(cd build && pwd)
 
-cd dp
-version=$(cat .version)
+version=$(cat version/number)
 echo -e "v$version" > $build_dir/release_name
-echo -e "v$version" > $build_dir/release_tag
+echo -e "$version" > $build_dir/release_tag
 
+cd dp
 git log `git describe --tags --abbrev=0`..HEAD --oneline > $build_dir/release_body
-
 cd ..
+
 
 project_path=$GOPATH/src/github.com/Bo0mer/
 mkdir -p $project_path
