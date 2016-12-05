@@ -26,7 +26,7 @@ var (
 
 func init() {
 	flag.StringVar(&addr, "addr", "localhost:8080", "Address to bind to.")
-	flag.StringVar(&target, "target", "https://google.com", "Target to proxy to.")
+	flag.StringVar(&target, "target", "https://example.com", "Target to proxy to.")
 	flag.StringVar(&format, "format", "auto", "Attempt to format payloads as.")
 	flag.BoolVar(&insecure, "insecure", false, "Please do not!")
 	flag.Var(&headers, "header", "Header to add. Must be in Name:value format.")
