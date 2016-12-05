@@ -1,15 +1,14 @@
 set -ex
 
-cd dp
-version=$(cat .version)
-echo -e "v$version" > release_name
-echo -e "v$version" > release_tag
-
-git log `git describe --tags --abbrev=0`..HEAD --oneline > release_body
-cat release_body
-
 mkdir -p build/
 build_dir=$(cd build && pwd)
+
+cd dp
+version=$(cat .version)
+echo -e "v$version" > $build_dir/release_name
+echo -e "v$version" > $build_dir/release_tag
+
+git log `git describe --tags --abbrev=0`..HEAD --oneline > $build_dir/release_body
 
 cd ..
 

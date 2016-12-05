@@ -11,6 +11,9 @@ inputs:
   - name: dp
   - name: version
 
+outputs:
+  - name: build
+
 run:
   path: sh #"dp/concourse/test.sh"
   args: ["-c", "dp/concourse/release.sh"]
