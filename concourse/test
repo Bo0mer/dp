@@ -5,4 +5,4 @@ mkdir -p $project_path
 cp -r dp $project_path
 
 cd $project_path
-ginkgo -r --race
+go test -race ./...
