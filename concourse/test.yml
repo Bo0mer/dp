@@ -11,4 +11,4 @@ inputs:
   - name: dp
 
 run:
-  path: dp/concourse/test.sh
+  path: pwd #dp/concourse/test.sh
