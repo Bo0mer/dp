@@ -5,4 +5,4 @@ mkdir -p $project_path
 cp -r dp $project_path
 
 cd $project_path
-go test -race ./...
+go test -race $(go list ./... | grep -v vendor)

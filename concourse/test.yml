@@ -11,4 +11,5 @@ inputs:
   - name: dp
 
 run:
-  path: dp/concourse/test.sh
+  path: sh #"dp/concourse/test.sh"
+  args: ["-c", "dp/concourse/test.sh"]
