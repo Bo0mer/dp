@@ -15,7 +15,7 @@ func TestNopFormatterDoesNothing(t *testing.T) {
 }
 
 func TestJSONFormatter(t *testing.T) {
-	src := []byte(`{"json":false}`)
+	src := []byte(`{"json":true}`)
 	want := []byte(`{
   "json": true
 }`)
