@@ -23,6 +23,9 @@ var (
 	insecure     bool
 	headers      flagvar.Map
 	skipBodyDump bool
+
+	cert string
+	key  string
 )
 
 func init() {
@@ -32,6 +35,8 @@ func init() {
 	flag.BoolVar(&insecure, "insecure", false, "Please do not!")
 	flag.Var(&headers, "header", "Header to add. Must be in Name:value format.")
 	flag.BoolVar(&skipBodyDump, "skip-body", false, "Don't dump body.")
+	flag.StringVar(&cert, "cert", "cert.pem", "Certificate file to use for TLS.")
+	flag.StringVar(&key, "key", "key.pem", "Key file to use for TLS.")
 }
 
 func main() {
@@ -81,7 +86,12 @@ func main() {
 	}
 
 	http.Handle("/", p)
-	if err := http.ListenAndServe(addr, nil); err != nil {
+	if key != "" && cert != "" {
+		err = http.ListenAndServeTLS(addr, cert, key, nil)
+	} else {
+		err = http.ListenAndServe(addr, nil)
+	}
+	if err != nil {
 		log.Fatalf("dp: error listening: %v\n", err)
 	}
 }
