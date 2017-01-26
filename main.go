@@ -17,11 +17,12 @@ import (
 )
 
 var (
-	addr     string
-	target   string
-	format   string
-	insecure bool
-	headers  flagvar.Map
+	addr         string
+	target       string
+	format       string
+	insecure     bool
+	headers      flagvar.Map
+	skipBodyDump bool
 )
 
 func init() {
@@ -30,6 +31,7 @@ func init() {
 	flag.StringVar(&format, "format", "auto", "Attempt to format payloads as.")
 	flag.BoolVar(&insecure, "insecure", false, "Please do not!")
 	flag.Var(&headers, "header", "Header to add. Must be in Name:value format.")
+	flag.BoolVar(&skipBodyDump, "skip-body", false, "Don't dump body.")
 }
 
 func main() {
@@ -71,6 +73,7 @@ func main() {
 					InsecureSkipVerify: insecure,
 				},
 			},
+			DumpBody:   !skipBodyDump,
 			Formatters: fmts,
 			In:         color.New(color.FgCyan),
 			Out:        color.New(color.FgMagenta),
@@ -88,6 +91,7 @@ type SniffTransport struct {
 	RoundTripper http.RoundTripper
 	In           Printer
 	Out          Printer
+	DumpBody     bool
 }
 
 func (s *SniffTransport) RoundTrip(req *http.Request) (*http.Response, error) {
@@ -114,7 +118,9 @@ func (s *SniffTransport) dumpRequest(req *http.Request) error {
 		return err
 	}
 	s.In.Printf(string(reqHead))
-
+	if !s.DumpBody {
+		return nil
+	}
 	save, req.Body, err = drainBody(req.Body)
 	if err != nil {
 		return err
@@ -142,6 +148,9 @@ func (s *SniffTransport) dumpResponse(resp *http.Response) error {
 		return err
 	}
 	s.Out.Printf(string(respHead))
+	if !s.DumpBody {
+		return nil
+	}
 
 	save, resp.Body, err = drainBody(resp.Body)
 	if err != nil {
