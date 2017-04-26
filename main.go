@@ -35,8 +35,8 @@ func init() {
 	flag.BoolVar(&insecure, "insecure", false, "Please do not!")
 	flag.Var(&headers, "header", "Header to add. Must be in Name:value format.")
 	flag.BoolVar(&skipBodyDump, "skip-body", false, "Don't dump body.")
-	flag.StringVar(&cert, "cert", "cert.pem", "Certificate file to use for TLS.")
-	flag.StringVar(&key, "key", "key.pem", "Key file to use for TLS.")
+	flag.StringVar(&cert, "cert", "", "Certificate file to use for TLS.")
+	flag.StringVar(&key, "key", "", "Key file to use for TLS.")
 }
 
 func main() {
