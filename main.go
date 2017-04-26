@@ -128,7 +128,7 @@ func (s *SniffTransport) dumpRequest(req *http.Request) error {
 		return err
 	}
 	s.In.Printf(string(reqHead))
-	if !s.DumpBody {
+	if !s.DumpBody || req.Body == nil {
 		return nil
 	}
 	save, req.Body, err = drainBody(req.Body)
