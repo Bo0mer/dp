@@ -18,7 +18,7 @@ Setting api endpoint to localhost:8080...
 OK
 ```
 
-Now observe how `dp` has printed the request and response headers and body to its stdin.
+Now observe how `dp` has printed the request and response headers and body to its stdout.
 It will automatically try to guess how to format the content of the body, if
 no explicit format is provided using the `format` flag.
 
