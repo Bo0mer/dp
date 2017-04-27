@@ -40,16 +40,22 @@ dp -target https://invalid.cert -insecure
 * plain
 
 ## Full usage help
-Usage of dp:
 ```
+Usage of dp:
   -addr string
     	Address to bind to. (default "localhost:8080")
+  -cert string
+    	Certificate file to use for TLS.
   -format string
     	Attempt to format payloads as. (default "auto")
   -header value
     	Header to add. Must be in Name:value format.
   -insecure
     	Please do not!
+  -key string
+    	Key file to use for TLS.
+  -skip-body
+    	Don't dump body.
   -target string
-    	Target to proxy to. (default "https://google.com")
+    	Target to proxy to. (default "https://example.com")
 ```
